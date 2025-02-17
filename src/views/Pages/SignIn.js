@@ -1,22 +1,4 @@
-/*!
-
-=========================================================
-* Vision UI Free Chakra - v1.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra
-* Copyright 2021 Creative Tim (https://www.creative-tim.com/)
-* Licensed under MIT (https://github.com/creativetimofficial/vision-ui-free-chakra/blob/master LICENSE.md)
-
-* Design and Coded by Simmmple & Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-import React from "react";
+import React, { useState } from "react";
 // Chakra imports
 import {
   Box,
@@ -38,10 +20,28 @@ import signInImage from "assets/img/signInImage.png";
 // Custom Components
 import AuthFooter from "components/Footer/AuthFooter";
 import GradientBorder from "components/GradientBorder/GradientBorder";
+import { useHistory } from "react-router-dom"; // Import useHistory hook
+import {login} from "../../services/authService"
 
 function SignIn() {
   const titleColor = "white";
   const textColor = "gray.400";
+  const history = useHistory();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+
+    try {
+      const userData = await login(email, password);
+      localStorage.setItem('user', JSON.stringify(userData)); // Store user data in localStorage
+      history.push('/dashboard'); // Redirect to dashboard on success
+    } catch (err) {
+      setError(err.message); // Show error message if login fails
+    }
+  };
 
   return (
     <Flex position='relative'>
@@ -101,7 +101,9 @@ function SignIn() {
                   w={{ base: "100%", md: "346px" }}
                   maxW='100%'
                   h='46px'
-                  placeholder='Your email adress'
+                  placeholder='Your email address'
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </GradientBorder>
             </FormControl>
@@ -128,10 +130,13 @@ function SignIn() {
                   maxW='100%'
                   type='password'
                   placeholder='Your password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </GradientBorder>
             </FormControl>
-            <FormControl display='flex' alignItems='center'>
+            {error && <Text color="red.500">{error}</Text>} {/* Display error message */}
+            {/* <FormControl display='flex' alignItems='center'>
               <DarkMode>
                 <Switch id='remember-login' colorScheme='brand' me='10px' />
               </DarkMode>
@@ -143,11 +148,11 @@ function SignIn() {
                 color='white'>
                 Remember me
               </FormLabel>
-            </FormControl>
+            </FormControl> */}
             <Button
               variant='brand'
               fontSize='10px'
-              type='submit'
+              onClick={handleSignIn} // Call sign-in function on button click
               w='100%'
               maxW='350px'
               h='45'
@@ -156,7 +161,7 @@ function SignIn() {
               SIGN IN
             </Button>
 
-            <Flex
+            {/* <Flex
               flexDirection='column'
               justifyContent='center'
               alignItems='center'
@@ -168,16 +173,16 @@ function SignIn() {
                   Sign Up
                 </Link>
               </Text>
-            </Flex>
+            </Flex> */}
           </Flex>
         </Flex>
-        <Box
+        {/* <Box
           w={{ base: "335px", md: "450px" }}
           mx={{ base: "auto", lg: "unset" }}
           ms={{ base: "auto", lg: "auto" }}
           mb='80px'>
           <AuthFooter />
-        </Box>
+        </Box> */}
         <Box
           display={{ base: "none", lg: "block" }}
           overflowX='hidden'
@@ -193,7 +198,6 @@ function SignIn() {
             h='100%'
             bgSize='cover'
             bgPosition='50%'
-            position='absolute'
             display='flex'
             flexDirection='column'
             justifyContent='center'
@@ -205,7 +209,7 @@ function SignIn() {
               letterSpacing='8px'
               fontSize='20px'
               fontWeight='500'>
-              INSPIRED BY THE FUTURE:
+              TOÁN THẦY TÀI
             </Text>
             <Text
               textAlign='center'
@@ -215,7 +219,7 @@ function SignIn() {
               fontWeight='bold'
               bgClip='text !important'
               bg='linear-gradient(94.56deg, #FFFFFF 79.99%, #21242F 102.65%)'>
-              THE VISION UI DASHBOARD
+              HỌC CHẮC HIỂU SÂU
             </Text>
           </Box>
         </Box>
