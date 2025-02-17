@@ -38,7 +38,7 @@ import {
 var dashRoutes = [
   {
     path: "/dashboard",
-    name: "Dashboard",
+    name: "Trang chủ",
     rtlName: "لوحة القيادة",
     icon: <HomeIcon color='inherit' />,
     component: Dashboard,
@@ -46,7 +46,7 @@ var dashRoutes = [
   },
   {
     path: "/tables",
-    name: "Tables",
+    name: "Tài liệu",
     rtlName: "لوحة القيادة",
     icon: <StatsIcon color='inherit' />,
     component: Tables,
@@ -54,19 +54,11 @@ var dashRoutes = [
   },
   {
     path: "/billing",
-    name: "Billing",
+    name: "Video",
     rtlName: "لوحة القيادة",
     icon: <CreditIcon color='inherit' />,
     component: Billing,
     layout: "/admin",
-  },
-  {
-    path: "/rtl-support-page",
-    name: "RTL",
-    rtlName: "آرتيإل",
-    icon: <SupportIcon color='inherit' />,
-    component: RTLPage,
-    layout: "/rtl",
   },
   {
     name: "ACCOUNT PAGES",
@@ -74,15 +66,16 @@ var dashRoutes = [
     rtlName: "صفحات",
     state: "pageCollapse",
     views: [
-      {
-        path: "/profile",
-        name: "Profile",
-        rtlName: "لوحة القيادة",
-        icon: <PersonIcon color='inherit' />,
-        secondaryNavbar: true,
-        component: Profile,
-        layout: "/admin",
-      },
+      // {
+      //   path: "/profile",
+      //   name: "Profile",
+      //   rtlName: "لوحة القيادة",
+      //   icon: <PersonIcon color='inherit' />,
+      //   secondaryNavbar: true,
+      //   // hidden: true,
+      //   component: Profile,
+      //   layout: "/admin",
+      // },
       {
         path: "/signin",
         name: "Sign In",
@@ -91,15 +84,15 @@ var dashRoutes = [
         component: SignIn,
         layout: "/auth",
       },
-      {
-        path: "/signup",
-        name: "Sign Up",
-        rtlName: "لوحة القيادة",
-        icon: <RocketIcon color='inherit' />,
-        secondaryNavbar: true,
-        component: SignUp,
-        layout: "/auth",
-      },
+      // {
+      //   path: "/signup",
+      //   name: "Sign Up",
+      //   rtlName: "لوحة القيادة",
+      //   icon: <RocketIcon color='inherit' />,
+      //   secondaryNavbar: true,
+      //   component: SignUp,
+      //   layout: "/auth",
+      // },
     ],
   },
 ];
