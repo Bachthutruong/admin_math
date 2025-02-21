@@ -27,12 +27,12 @@ export default function HeaderLinks(props) {
   const settingsRef = React.useRef();
 
   // Kiểm tra nếu người dùng đã đăng nhập và lấy email
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user_admin"));
   const email = user?.data ? user?.data.email : null;
 
   // Hàm đăng xuất
   const handleLogout = () => {
-    localStorage.removeItem("user"); // Xóa dữ liệu người dùng khỏi localStorage
+    localStorage.removeItem("user_admin"); // Xóa dữ liệu người dùng khỏi localStorage
     history.push("/auth/signin"); // Chuyển hướng đến trang đăng nhập
   };
 

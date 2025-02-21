@@ -9,7 +9,7 @@ gulp.task("licenses", async function () {
       gap.prependText(`/*!
 
       =========================================================
-      * Vision UI Free Chakra - v1.0.0
+      * Toán Thầy Tài Chakra - v1.0.0
       =========================================================
       
       * Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra
@@ -34,7 +34,7 @@ gulp.task("licenses", async function () {
       /*!
 
       =========================================================
-      * Vision UI Free Chakra - v1.0.0
+      * Toán Thầy Tài Chakra - v1.0.0
       =========================================================
       
       * Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra
@@ -59,7 +59,7 @@ gulp.task("licenses", async function () {
       gap.prependText(`/*!
 
       =========================================================
-      * Vision UI Free Chakra - v1.0.0
+      * Toán Thầy Tài Chakra - v1.0.0
       =========================================================
       
       * Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra
