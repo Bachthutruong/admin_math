@@ -36,7 +36,7 @@ function SignIn() {
 
     try {
       const userData = await login(email, password);
-      localStorage.setItem('user', JSON.stringify(userData)); // Store user data in localStorage
+      localStorage.setItem('user_admin', JSON.stringify(userData)); // Store user data in localStorage
       history.push('/dashboard'); // Redirect to dashboard on success
     } catch (err) {
       setError(err.message); // Show error message if login fails

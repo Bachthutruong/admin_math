@@ -11,7 +11,7 @@ import theme from "theme/themeAuth.js";
 /*!
 
 =========================================================
-* Vision UI Free Chakra - v1.0.0
+* Toán Thầy Tài Chakra - v1.0.0
 =========================================================
 
 * Product Page: https://www.creative-tim.com/product/vision-ui-free-chakra

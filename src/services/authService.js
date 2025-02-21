@@ -6,6 +6,7 @@ export const login = async (email, password) => {
       headers: {
         'Content-Type': 'application/json',
       },
+      // credentials: 'include',  // Chắc chắn rằng cookie được gửi đi
       body: JSON.stringify({
         email,
         password,
