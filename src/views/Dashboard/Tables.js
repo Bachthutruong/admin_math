@@ -20,7 +20,7 @@ function Tables() {
   // Hàm để fetch lại danh sách tài liệu
   const fetchDocuments = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/api/documents');
+      const response = await axios.get('https://math-be.onrender.com/api/documents');
       const data = response.data;
       setDocuments(data);
       setPagination({
@@ -170,7 +170,7 @@ function Tables() {
       formData.append('type', values.type);
 
       // Gửi request API upload
-      const response = await axios.post('http://localhost:8080/api/upload', formData, {
+      const response = await axios.post('https://math-be.onrender.com/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -235,9 +235,9 @@ function Tables() {
             rules={[{ required: true, message: 'Vui lòng chọn loại tài liệu!' }]}
           >
             <Select placeholder="Chọn loại tài liệu">
-              <Select.Option value="vở học sinh">Vở học sinh</Select.Option>
-              <Select.Option value="đề kiểm tra">Đề kiểm tra</Select.Option>
-              <Select.Option value="phiếu bài tập">Phiếu bài tập</Select.Option>
+              <Select.Option value="Book">Vở học sinh</Select.Option>
+              <Select.Option value="Exam">Đề kiểm tra</Select.Option>
+              <Select.Option value="Document">Phiếu bài tập</Select.Option>
             </Select>
           </Form.Item>
 
