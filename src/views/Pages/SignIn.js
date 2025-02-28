@@ -20,13 +20,13 @@ import signInImage from "assets/img/signInImage.png";
 // Custom Components
 import AuthFooter from "components/Footer/AuthFooter";
 import GradientBorder from "components/GradientBorder/GradientBorder";
-import { useHistory } from "react-router-dom"; // Import useHistory hook
+import { useNavigate } from "react-router-dom"; // Import useHistory hook
 import {login} from "../../services/authService"
 
 function SignIn() {
   const titleColor = "white";
   const textColor = "gray.400";
-  const history = useHistory();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,7 +37,7 @@ function SignIn() {
     try {
       const userData = await login(email, password);
       localStorage.setItem('user_admin', JSON.stringify(userData)); // Store user data in localStorage
-      history.push('/dashboard'); // Redirect to dashboard on success
+      navigate('/dashboard'); // Redirect to dashboard on success
     } catch (err) {
       setError(err.message); // Show error message if login fails
     }

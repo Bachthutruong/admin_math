@@ -17,12 +17,12 @@ import { ProfileIcon, SettingsIcon } from "components/Icons/Icons";
 import { ItemContent } from "components/Menu/ItemContent";
 import { SidebarResponsive } from "components/Sidebar/Sidebar";
 import PropTypes from "prop-types";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import routes from "routes.js";
 
 export default function HeaderLinks(props) {
   const { variant, children, fixed, secondary, onOpen, ...rest } = props;
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const settingsRef = React.useRef();
 
@@ -33,7 +33,7 @@ export default function HeaderLinks(props) {
   // Hàm đăng xuất
   const handleLogout = () => {
     localStorage.removeItem("user_admin"); // Xóa dữ liệu người dùng khỏi localStorage
-    history.push("/auth/signin"); // Chuyển hướng đến trang đăng nhập
+    navigate("/auth/signin"); // Chuyển hướng đến trang đăng nhập
   };
 
   return (

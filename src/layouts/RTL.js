@@ -25,7 +25,7 @@ import Footer from "components/Footer/Footer.js";
 import AdminNavbar from "components/Navbars/AdminNavbar.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import React, { useState } from "react";
-import { Redirect, Route, Switch } from "react-router-dom";
+import { Navigate , Route, Routes } from "react-router-dom";
 import routes from "routes.js";
 // Custom Chakra theme
 import theme from "theme/themeAdmin";
@@ -142,10 +142,10 @@ export default function Dashboard(props) {
           {getRoute() ? (
             <PanelContent>
               <PanelContainer>
-                <Switch>
+                <Routes>
                   {getRoutes(routes)}
-                  <Redirect from='/rtl' to='/rtl/rtl-support-page' />
-                </Switch>
+                  <Navigate from='/rtl' to='/rtl/rtl-support-page' />
+                </Routes>
               </PanelContainer>
             </PanelContent>
           ) : null}

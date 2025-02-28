@@ -19,7 +19,8 @@
 // import
 import Dashboard from "views/Dashboard/Dashboard.js";
 import Tables from "views/Dashboard/Tables.js";
-import Billing from "views/Dashboard/Billing.js";
+import Courses from "views/Dashboard/Courses.js";
+import DetailCourse from "views/Dashboard/DetailCourse.js"
 import RTLPage from "views/RTL/RTLPage.js";
 import Profile from "views/Dashboard/Profile.js";
 import SignIn from "views/Pages/SignIn.js";
@@ -53,15 +54,23 @@ var dashRoutes = [
     layout: "/admin",
   },
   {
-    path: "/billing",
+    path: "/course",
     name: "Video",
     rtlName: "لوحة القيادة",
     icon: <CreditIcon color='inherit' />,
-    component: Billing,
+    component: Courses,
     layout: "/admin",
   },
   {
-    name: "ACCOUNT PAGES",
+    path: "/course/:id", // Route chi tiết khóa học
+    name: "Chi tiết khóa học",
+    rtlName: "لوحة القيادة",
+    component: DetailCourse, // Component hiển thị chi tiết khóa học
+    layout: "/user",
+    hidden: true,
+  },
+  {
+    name: "",
     category: "account",
     rtlName: "صفحات",
     state: "pageCollapse",
@@ -76,14 +85,14 @@ var dashRoutes = [
       //   component: Profile,
       //   layout: "/admin",
       // },
-      {
-        path: "/signin",
-        name: "Sign In",
-        rtlName: "لوحة القيادة",
-        icon: <DocumentIcon color='inherit' />,
-        component: SignIn,
-        layout: "/auth",
-      },
+      // {
+      //   path: "/signin",
+      //   name: "Sign In",
+      //   rtlName: "لوحة القيادة",
+      //   icon: <DocumentIcon color='inherit' />,
+      //   component: SignIn,
+      //   layout: "/auth",
+      // },
       // {
       //   path: "/signup",
       //   name: "Sign Up",
