@@ -32,7 +32,9 @@ export default function HeaderLinks(props) {
 
   // Hàm đăng xuất
   const handleLogout = () => {
-    localStorage.removeItem("user_admin"); // Xóa dữ liệu người dùng khỏi localStorage
+    localStorage.removeItem("user_admin");
+    localStorage.removeItem("courseId");
+    localStorage.removeItem("name_course");// Xóa dữ liệu người dùng khỏi localStorage
     history.push("/auth/signin"); // Chuyển hướng đến trang đăng nhập
   };
 
