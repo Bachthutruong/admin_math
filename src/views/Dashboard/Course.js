@@ -1,12 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Table, Typography, Input, Space, Select, Button, Modal, Form, Upload, message } from "antd";
-import axios from 'axios';
-import { UploadOutlined } from '@ant-design/icons';
+import {
+  Table,
+  Typography,
+  Input,
+  Space,
+  Select,
+  Button,
+  Modal,
+  Form,
+  Upload,
+  message,
+} from "antd";
+import axios from "axios";
+import { UploadOutlined } from "@ant-design/icons";
 import { useHistory } from "react-router-dom"; // Import useHistory hook
 
 const { Title } = Typography;
 
-function Tables() {
+function Courses() {
   const [documents, setDocuments] = useState([]);
   const history = useHistory();
   const [pagination, setPagination] = useState({
@@ -15,23 +26,23 @@ function Tables() {
     total: 0,
   });
   useEffect(() => {
-    const userAdmin = localStorage.getItem('user_admin');
+    const userAdmin = localStorage.getItem("user_admin");
     if (!userAdmin) {
-      history.push('/signin');
+      history.push("/signin");
     } else {
       fetchDocuments();
     }
   }, [history]);
 
-
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]); // Để lưu trữ danh sách file đã chọn
 
-  // Hàm để fetch lại danh sách tài liệu
   const fetchDocuments = async () => {
     try {
-      const response = await axios.get('https://math-be.onrender.com/api/documents');
+      const response = await axios.get(
+        "https://math-be.onrender.com/api/v1/course/all-course"
+      );
       const data = response.data;
       setDocuments(data);
       setPagination({
@@ -39,7 +50,7 @@ function Tables() {
         total: data.length,
       });
     } catch (error) {
-      console.error("Đã có lỗi khi lấy dữ liệu tài liệu!", error);
+      console.error("Đã có lỗi khi lấy dữ liệu khóa học!", error);
     }
   };
 
@@ -49,21 +60,24 @@ function Tables() {
 
   const columns = [
     {
-      title: 'STT',
-      render: (text, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+      title: "STT",
+      render: (text, record, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
       width: 60,
     },
     {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
+      title: "Tiêu đề",
+      dataIndex: "title",
+      key: "title",
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
         <div style={{ padding: 8 }}>
           <Input
             value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
             placeholder="Search Title"
-            style={{ marginBottom: 8, display: 'block' }}
+            style={{ marginBottom: 8, display: "block" }}
           />
           <Space>
             <button onClick={() => confirm()}>Search</button>
@@ -71,19 +85,22 @@ function Tables() {
           </Space>
         </div>
       ),
-      onFilter: (value, record) => record.title.toLowerCase().includes(value.toLowerCase()), 
+      onFilter: (value, record) =>
+        record.title.toLowerCase().includes(value.toLowerCase()),
     },
     {
-      title: 'Description',
-      dataIndex: 'description',
-      key: 'description',
+      title: "Mô tả khóa học",
+      dataIndex: "description",
+      key: "description",
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
         <div style={{ padding: 8 }}>
           <Input
             value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
             placeholder="Search Description"
-            style={{ marginBottom: 8, display: 'block' }}
+            style={{ marginBottom: 8, display: "block" }}
           />
           <Space>
             <button onClick={() => confirm()}>Search</button>
@@ -91,60 +108,35 @@ function Tables() {
           </Space>
         </div>
       ),
-      onFilter: (value, record) => record.description.toLowerCase().includes(value.toLowerCase()), 
+      onFilter: (value, record) =>
+        record.description.toLowerCase().includes(value.toLowerCase()),
     },
     {
-      title: 'Class',
-      dataIndex: 'class',
-      key: 'class',
+      title: "Ảnh khóa học",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      render: (text) => {
+        const maxLength = 60;
+        const displayText =
+          text?.length > maxLength
+            ? `${text.substring(0, maxLength)}...`
+            : text;
+
+        return (
+          <a href={text} target="_blank" rel="noopener noreferrer">
+            {displayText}
+          </a>
+        );
+      },
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
         <div style={{ padding: 8 }}>
           <Input
             value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            placeholder="Search Class"
-            style={{ marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <button onClick={() => confirm()}>Search</button>
-            <button onClick={() => setSelectedKeys([])}>Reset</button>
-          </Space>
-        </div>
-      ),
-      onFilter: (value, record) => record.class.toLowerCase().includes(value.toLowerCase()), 
-    },
-    {
-      title: 'Loại tài liệu',
-      dataIndex: 'type',
-      key: 'type',
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-            placeholder="Search Type"
-            style={{ marginBottom: 8, display: 'block' }}
-          />
-          <Space>
-            <button onClick={() => confirm()}>Search</button>
-            <button onClick={() => setSelectedKeys([])}>Reset</button>
-          </Space>
-        </div>
-      ),
-      onFilter: (value, record) => record.type.toLowerCase().includes(value.toLowerCase()), 
-    },
-    {
-      title: 'File URL',
-      dataIndex: 'fileUrl',
-      key: 'fileUrl',
-      render: (text) => <a href={text} target="_blank" rel="noopener noreferrer">{text}</a>,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
-        <div style={{ padding: 8 }}>
-          <Input
-            value={selectedKeys[0]}
-            onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+            onChange={(e) =>
+              setSelectedKeys(e.target.value ? [e.target.value] : [])
+            }
             placeholder="Search File URL"
-            style={{ marginBottom: 8, display: 'block' }}
+            style={{ marginBottom: 8, display: "block" }}
           />
           <Space>
             <button onClick={() => confirm()}>Search</button>
@@ -152,7 +144,23 @@ function Tables() {
           </Space>
         </div>
       ),
-      onFilter: (value, record) => record.fileUrl.toLowerCase().includes(value.toLowerCase()), 
+      onFilter: (value, record) =>
+        record.fileUrl.toLowerCase().includes(value.toLowerCase()),
+    },
+    {
+      title: "Danh sách bài học",
+      key: "lessonList",
+      render: (text, record) => {
+        const history = useHistory();
+
+        const handleClick = () => {
+          localStorage.setItem("courseId", record._id);
+          localStorage.setItem("name_course", record.title);// record.id là _id của khóa học
+          history.push("/admin/lesson");
+        };
+
+        return <Button onClick={handleClick} style={{backgroundColor:'blue', color:'white'}}>Xem chi tiết</Button>;
+      },
     },
   ];
 
@@ -174,18 +182,19 @@ function Tables() {
     try {
       const values = await form.validateFields();
       const formData = new FormData();
-      formData.append('file', fileList[0]?.originFileObj); // Lấy file đầu tiên trong file list
-      formData.append('title', values.title);
-      formData.append('description', values.description);
-      formData.append('class', values.class);
-      formData.append('type', values.type);
+      formData.append("file", fileList[0]?.originFileObj); // Lấy file đầu tiên trong file list
+      formData.append("title", values.title);
+      formData.append("description", values.description);
 
-      // Gửi request API upload
-      const response = await axios.post('https://math-be.onrender.com/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+        "https://math-be.onrender.com/api/v1/course/create",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       message.success(response.data.message);
       handleModalClose(); // Đóng modal sau khi upload thành công
@@ -203,14 +212,23 @@ function Tables() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <Title level={3} style={{ color: '#fff', marginTop: '50px', display: 'flex', justifyContent: 'space-between' }}>
-        Danh sách tài liệu
-        <Button type="primary" onClick={handleModalOpen}>Thêm tài liệu</Button>
+      <Title
+        level={3}
+        style={{
+          color: "#fff",
+          marginTop: "50px",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        Danh sách khóa học
+        <Button type="primary" onClick={handleModalOpen}>
+          Thêm khóa học
+        </Button>
       </Title>
 
-      {/* Modal Thêm tài liệu */}
       <Modal
-        title="Thêm tài liệu mới"
+        title="Thêm khóa học mới"
         visible={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
@@ -219,7 +237,7 @@ function Tables() {
           <Form.Item
             name="title"
             label="Tiêu đề"
-            rules={[{ required: true, message: 'Vui lòng nhập tiêu đề!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập tiêu đề!" }]}
           >
             <Input />
           </Form.Item>
@@ -227,38 +245,18 @@ function Tables() {
           <Form.Item
             name="description"
             label="Mô tả"
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
           >
             <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="class"
-            label="Lớp"
-            rules={[{ required: true, message: 'Vui lòng nhập lớp!' }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="type"
-            label="Loại tài liệu"
-            rules={[{ required: true, message: 'Vui lòng chọn loại tài liệu!' }]}
-          >
-            <Select placeholder="Chọn loại tài liệu">
-              <Select.Option value="Book">Vở học sinh</Select.Option>
-              <Select.Option value="Exam">Đề kiểm tra</Select.Option>
-              <Select.Option value="Document">Phiếu bài tập</Select.Option>
-            </Select>
           </Form.Item>
 
           <Form.Item
             name="file"
             label="Chọn file"
-            rules={[{ required: true, message: 'Vui lòng chọn file!' }]}
+            rules={[{ required: true, message: "Vui lòng chọn file!" }]}
           >
-            <Upload 
-              accept="application/pdf"
+            <Upload
+              accept="image/*"
               fileList={fileList} // Hiển thị các file đã chọn
               onChange={handleFileChange} // Cập nhật danh sách file khi có thay đổi
               showUploadList={true} // Hiển thị danh sách file đã chọn
@@ -268,14 +266,17 @@ function Tables() {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" onClick={handleUpload} style={{ width: '100%' }}>
+            <Button
+              type="primary"
+              onClick={handleUpload}
+              style={{ width: "100%" }}
+            >
               Upload
             </Button>
           </Form.Item>
         </Form>
       </Modal>
 
-      {/* Chọn số dòng hiển thị */}
       <div style={{ marginBottom: 16 }}>
         <Select
           defaultValue={pagination.pageSize}
@@ -319,4 +320,4 @@ function Tables() {
   );
 }
 
-export default Tables;
+export default Courses;

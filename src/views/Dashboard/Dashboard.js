@@ -39,6 +39,7 @@ import {
 	Thead,
 	Tr
 } from '@chakra-ui/react';
+import React, { useEffect } from "react";
 // Styles for the circular progressbar
 import medusa from 'assets/img/cardimgfree.png';
 // Custom components
@@ -52,7 +53,6 @@ import IconBox from 'components/Icons/IconBox';
 import { CartIcon, DocumentIcon, GlobeIcon, RocketIcon, StatsIcon, WalletIcon } from 'components/Icons/Icons.js';
 import DashboardTableRow from 'components/Tables/DashboardTableRow';
 import TimelineRow from 'components/Tables/TimelineRow';
-import React from 'react';
 import { AiFillCheckCircle } from 'react-icons/ai';
 import { BiHappy } from 'react-icons/bi';
 import { BsArrowRight } from 'react-icons/bs';
@@ -65,8 +65,15 @@ import {
 	lineChartOptionsDashboard
 } from 'variables/charts';
 import { dashboardTableData, timelineData } from 'variables/general';
-
+import {useHistory} from "react-router-dom"
 export default function Dashboard() {
+	const history = useHistory();
+	// useEffect(() => {
+	// 	const userAdmin = localStorage.getItem('user_admin')
+	// 	if (!userAdmin) {
+	// 		history.push('/signin')
+	// 	}
+	// }
 	return (
 		<Flex flexDirection='column' pt={{ base: '120px', md: '75px' }}>
 			<SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing='24px'>

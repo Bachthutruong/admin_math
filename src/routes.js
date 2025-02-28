@@ -19,8 +19,8 @@
 // import
 import Dashboard from "views/Dashboard/Dashboard.js";
 import Tables from "views/Dashboard/Tables.js";
-import Billing from "views/Dashboard/Billing.js";
-import RTLPage from "views/RTL/RTLPage.js";
+import Courses from "views/Dashboard/Course.js";
+import CourseDetail from "views/Dashboard/CourseDetail.js";
 import Profile from "views/Dashboard/Profile.js";
 import SignIn from "views/Pages/SignIn.js";
 import SignUp from "views/Pages/SignUp.js";
@@ -53,11 +53,19 @@ var dashRoutes = [
     layout: "/admin",
   },
   {
-    path: "/billing",
-    name: "Video",
+    path: "/course",
+    name: "Danh sách khóa học",
     rtlName: "لوحة القيادة",
     icon: <CreditIcon color='inherit' />,
-    component: Billing,
+    component: Courses,
+    layout: "/admin",
+  },
+  {
+    path: "/lesson", // Đăng ký route mới với tham số dynamic :id
+    name: "Chi tiết khóa học",
+    rtlName: "لوحة القيادة",
+    icon: <DocumentIcon color="inherit" />, // Bạn có thể thay đổi icon tùy ý
+    component: CourseDetail, // Gán component mới tạo
     layout: "/admin",
   },
   {
