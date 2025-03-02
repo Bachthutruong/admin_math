@@ -12,7 +12,11 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import { UploadOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 import { useHistory } from "react-router-dom"; // Import useHistory hook
 
 const { Title } = Typography;
@@ -33,12 +37,17 @@ function CourseDetail() {
     const userAdmin = localStorage.getItem("user_admin");
     if (!userAdmin) {
       history.push("/signin");
+    } else {
+      fetchDocuments();
     }
   }, [history]); // Chạy lại khi courseId thay đổi
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
-  const [fileList, setFileList] = useState([]); // Để lưu trữ danh sách file đã chọn
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingLesson, setEditingLesson] = useState(null);
+  const [deletingLesson, setDeletingLesson] = useState(null); // Để lưu trữ danh sách file đã chọn
 
   // Hàm fetch tài liệu
   const fetchDocuments = async () => {
@@ -146,51 +155,84 @@ function CourseDetail() {
       onFilter: (value, record) =>
         record.fileUrl.toLowerCase().includes(value.toLowerCase()),
     },
+    {
+      title: "Thao tác",
+      key: "actions",
+      render: (text, record) => (
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => handleModalOpen(record)}
+          />
+          <Button
+            icon={<DeleteOutlined />}
+            danger
+            onClick={() => showDeleteModal(record)}
+          />
+        </Space>
+      ),
+    },
   ];
 
-  const handleModalOpen = () => {
+  const handleModalOpen = (lesson = null) => {
+    setIsEditMode(!!lesson);
+    setEditingLesson(lesson);
+    form.setFieldsValue(lesson || {});
     setIsModalVisible(true);
   };
 
   const handleModalClose = () => {
     setIsModalVisible(false);
     form.resetFields();
-    setFileList([]); // Reset file list khi đóng modal
   };
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
-  const handleFileChange = ({ fileList: newFileList }) => {
-    setFileList(newFileList); // Cập nhật file list khi có thay đổi
-  };
+  const handleSubmit = async () => {
+      const values = await form.validateFields();
 
-  const handleUpload = async () => {
-  try {
-    const values = await form.validateFields();
+      const lessonData = {
+        title: values.title,
+        content: values.content,
+        videoUrl: values.videoUrl,
+        courseId: storedId,
+      };
 
-    const lessonData = {
-      title: values.title,
-      content: values.content,
-      videoUrl: values.videoUrl,
-      courseId: storedId
-    };
-
-    const response = await axios.post(
-      "https://math-be.onrender.com/api/v1/lesson/create/lesson",
-      lessonData,
-      {
-        headers: {
-          "Content-Type": "application/json", 
-        },
+      if (isEditMode) {
+        await axios.put(
+          `https://math-be.onrender.com/api/v1/course/${storedId}/lessons/${editingLesson._id}`,
+          lessonData
+        );
+        message.success("Bài học đã được cập nhật!");
+      } else {
+        await axios.post(
+          "https://math-be.onrender.com/api/v1/lesson/create/lesson",
+          lessonData
+        );
+        message.success("Thêm bài học thành công!");
       }
-    );
 
-    message.success(response.data.message); // Hiển thị thông báo thành công
-    handleModalClose(); // Đóng modal sau khi upload thành công
-    fetchDocuments(); // Refetch lại danh sách tài liệu sau khi upload thành công
-  } catch (error) {
-    message.error("Đã có lỗi khi upload tài liệu!"); // Thông báo lỗi nếu có
-  }
-};
+      fetchDocuments(); 
+      handleModalClose(); // Đóng modal sau khi thành công
+  };
+  const showDeleteModal = (lesson) => {
+    setDeletingLesson(lesson);
+    setIsDeleteModalVisible(true);
+  };
 
+  const handleDelete = async () => {
+    try {
+      await axios.delete(
+        `https://math-be.onrender.com/api/v1/course/${storedId}/lessons/${deletingLesson._id}`
+      );
+      message.success("Bài học đã bị xóa!");
+      fetchDocuments();
+      setIsDeleteModalVisible(false); // Đóng modal sau khi xóa thành công
+    } catch (error) {
+      message.error("Xóa bài học thất bại!");
+    }
+  };
 
   const pageSizeOptions = [5, 10, 15, 20];
   const currentData = documents.slice(
@@ -210,13 +252,13 @@ function CourseDetail() {
         }}
       >
         Danh sách bài học của khóa học: {nameCourse}
-        <Button type="primary" onClick={handleModalOpen}>
+        <Button type="primary" onClick={() => handleModalOpen()}>
           Thêm bài học
         </Button>
       </Title>
 
       <Modal
-        title="Thêm bài học mới"
+        title={isEditMode ? "Chỉnh sửa bài học" : "Thêm bài học mới"}
         visible={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
@@ -245,15 +287,22 @@ function CourseDetail() {
             <Input />
           </Form.Item>
           <Form.Item>
-            <Button
-              type="primary"
-              onClick={handleUpload}
-              style={{ width: "100%" }}
-            >
-              Upload
+            <Button type="primary" onClick={handleSubmit} style={{ width: "100%" }}>
+              {isEditMode ? "Cập nhật" : "Tải lên"}
             </Button>
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="Xác nhận xóa"
+        visible={isDeleteModalVisible}
+        onOk={handleDelete}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        okText="Xóa"
+        okType="danger"
+        cancelText="Hủy"
+      >
+        <p>Bạn có chắc muốn xóa bài học "{deletingLesson?.title}"? Hành động này không thể hoàn tác.</p>
       </Modal>
 
       <div style={{ marginBottom: 16 }}>

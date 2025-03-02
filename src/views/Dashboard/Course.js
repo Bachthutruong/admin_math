@@ -12,7 +12,7 @@ import {
   message,
 } from "antd";
 import axios from "axios";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useHistory } from "react-router-dom"; // Import useHistory hook
 
 const { Title } = Typography;
@@ -36,6 +36,11 @@ function Courses() {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [deletingCourse, setDeletingCourse] = useState(null);
+
   const [fileList, setFileList] = useState([]); // Để lưu trữ danh sách file đã chọn
 
   const fetchDocuments = async () => {
@@ -162,46 +167,93 @@ function Courses() {
         return <Button onClick={handleClick} style={{backgroundColor:'blue', color:'white'}}>Xem chi tiết</Button>;
       },
     },
+    {
+      title: "Thao tác",
+      key: "actions",
+      render: (text, record) => (
+        <Space>
+          <Button icon={<EditOutlined />} onClick={() => handleModalOpen(record)} />
+          <Button icon={<DeleteOutlined />} danger onClick={() => showDeleteModal(record)} />
+        </Space>
+      ),
+    },
   ];
 
-  const handleModalOpen = () => {
+  const handleModalOpen = (course = null) => {
+    setIsEditMode(!!course);
+    setEditingCourse(course);
+    form.setFieldsValue(course || {});
+
+    if (course?.imageUrl) {
+      setFileList([
+        {
+          uid: "-1",
+          name: course.imageUrl.split("/").pop(),
+          status: "done",
+          url: course.imageUrl,
+        },
+      ]);
+    } else {
+      setFileList([]);
+    }
+
     setIsModalVisible(true);
   };
-
   const handleModalClose = () => {
     setIsModalVisible(false);
     form.resetFields();
-    setFileList([]); // Reset file list khi đóng modal
+    setFileList([]);
   };
 
   const handleFileChange = ({ fileList: newFileList }) => {
     setFileList(newFileList); // Cập nhật file list khi có thay đổi
   };
 
-  const handleUpload = async () => {
+  const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       const formData = new FormData();
-      formData.append("file", fileList[0]?.originFileObj); // Lấy file đầu tiên trong file list
+
+      if (fileList.length > 0 && fileList[0]?.originFileObj) {
+        formData.append("file", fileList[0].originFileObj);
+      } else if (isEditMode && editingCourse?.imageUrl) {
+        formData.append("file", editingCourse.imageUrl);
+      }
+
       formData.append("title", values.title);
       formData.append("description", values.description);
 
-      const response = await axios.post(
-        "https://math-be.onrender.com/api/v1/course/create",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      if (isEditMode) {
+        await axios.put(
+          `https://math-be.onrender.com/api/v1/course/${editingCourse._id}`,
+          formData
+        );
+        message.success("Khóa học đã được cập nhật!");
+      } else {
+        await axios.post("https://math-be.onrender.com/api/v1/course/create", formData);
+        message.success("Khóa học đã được thêm mới!");
+      }
 
-      message.success(response.data.message);
-      handleModalClose(); // Đóng modal sau khi upload thành công
-      fetchDocuments(); // Refetch lại danh sách tài liệu sau khi upload thành công
+      fetchDocuments();
+      handleModalClose();
     } catch (error) {
-      message.error("Đã có lỗi khi upload tài liệu!");
+      message.error("Lỗi khi lưu khóa học!");
     }
+  };
+  const showDeleteModal = (course) => {
+    setDeletingCourse(course);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await axios.delete(`https://math-be.onrender.com/api/v1/course/${deletingCourse._id}`);
+      message.success("Khóa học đã bị xóa!");
+      fetchDocuments();
+    } catch (error) {
+      message.error("Xóa khóa học thất bại!");
+    }
+    setIsDeleteModalVisible(false);
   };
 
   const pageSizeOptions = [5, 10, 15, 20];
@@ -222,13 +274,13 @@ function Courses() {
         }}
       >
         Danh sách khóa học
-        <Button type="primary" onClick={handleModalOpen}>
+        <Button type="primary" onClick={() => handleModalOpen()}>
           Thêm khóa học
         </Button>
       </Title>
 
       <Modal
-        title="Thêm khóa học mới"
+        title={isEditMode ? "Chỉnh sửa khóa học" : "Thêm khóa học mới"}
         visible={isModalVisible}
         onCancel={handleModalClose}
         footer={null}
@@ -257,25 +309,34 @@ function Courses() {
           >
             <Upload
               accept="image/*"
-              fileList={fileList} // Hiển thị các file đã chọn
-              onChange={handleFileChange} // Cập nhật danh sách file khi có thay đổi
-              showUploadList={true} // Hiển thị danh sách file đã chọn
+              fileList={fileList}
+              onChange={handleFileChange}
+              showUploadList={true}
+              beforeUpload={() => false}
             >
               <Button icon={<UploadOutlined />}>Chọn file</Button>
             </Upload>
           </Form.Item>
 
           <Form.Item>
-            <Button
-              type="primary"
-              onClick={handleUpload}
-              style={{ width: "100%" }}
-            >
-              Upload
+            <Button type="primary" onClick={handleSubmit} style={{ width: "100%" }}>
+              {isEditMode ? "Cập nhật" : "Tải lên"}
             </Button>
           </Form.Item>
         </Form>
       </Modal>
+      <Modal
+        title="Xác nhận xóa"
+        visible={isDeleteModalVisible}
+        onOk={handleDelete}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        okText="Xóa"
+        okType="danger"
+        cancelText="Hủy"
+      >
+        <p>Bạn có chắc muốn xóa khóa học "{deletingCourse?.title}"? Hành động này không thể hoàn tác.</p>
+      </Modal>
+
 
       <div style={{ marginBottom: 16 }}>
         <Select
