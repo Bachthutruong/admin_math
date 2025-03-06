@@ -15,6 +15,7 @@ import axios from "axios";
 import {
   EditOutlined,
   DeleteOutlined,
+  PlusOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useHistory } from "react-router-dom"; // Import useHistory hook
@@ -120,20 +121,28 @@ function CourseDetail() {
         record.description.toLowerCase().includes(value.toLowerCase()),
     },
     {
-      title: "Link bài học",
-      dataIndex: "videoUrl",
+      title: "Link video",
       key: "videoUrl",
-      render: (text) => {
-        const maxLength = 60;
-        const displayText =
-          text?.length > maxLength
-            ? `${text.substring(0, maxLength)}...`
-            : text;
-
+      render: (text, record) => {
+        // Hiển thị danh sách các video trong mỗi bài học
         return (
-          <a href={text} target="_blank" rel="noopener noreferrer">
-            {displayText}
-          </a>
+          <div>
+            {record.videos && record.videos.length > 0 ? (
+              record.videos.map((video, index) => (
+                <div key={index} className="mt-2">
+                  <a
+                    href={video?.videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {video?.title || `Video ${index + 1}`}
+                  </a>
+                </div>
+              ))
+            ) : (
+              <span>Chưa có video</span>
+            )}
+          </div>
         );
       },
       filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -143,7 +152,7 @@ function CourseDetail() {
             onChange={(e) =>
               setSelectedKeys(e.target.value ? [e.target.value] : [])
             }
-            placeholder="Search File URL"
+            placeholder="Search Video URL"
             style={{ marginBottom: 8, display: "block" }}
           />
           <Space>
@@ -153,7 +162,9 @@ function CourseDetail() {
         </div>
       ),
       onFilter: (value, record) =>
-        record.fileUrl.toLowerCase().includes(value.toLowerCase()),
+        record.videos.some((video) =>
+          video.videoUrl.toLowerCase().includes(value.toLowerCase())
+        ),
     },
     {
       title: "Thao tác",
@@ -177,7 +188,14 @@ function CourseDetail() {
   const handleModalOpen = (lesson = null) => {
     setIsEditMode(!!lesson);
     setEditingLesson(lesson);
-    form.setFieldsValue(lesson || {});
+
+    const initialVideos = lesson ? lesson.videos : [];
+
+    form.setFieldsValue({
+      ...lesson,
+      videos: initialVideos,
+    });
+
     setIsModalVisible(true);
   };
 
@@ -190,31 +208,33 @@ function CourseDetail() {
   }, []);
 
   const handleSubmit = async () => {
-      const values = await form.validateFields();
+    const values = await form.validateFields();
 
-      const lessonData = {
-        title: values.title,
-        content: values.content,
-        videoUrl: values.videoUrl,
-        courseId: storedId,
-      };
+    const lessonData = {
+      title: values.title,
+      content: values.content,
+      videos: values.videos,
+      courseId: storedId,
+    };
 
-      if (isEditMode) {
-        await axios.put(
-          `https://math-be.onrender.com/api/v1/course/${storedId}/lessons/${editingLesson._id}`,
-          lessonData
-        );
-        message.success("Bài học đã được cập nhật!");
-      } else {
-        await axios.post(
-          "https://math-be.onrender.com/api/v1/lesson/create/lesson",
-          lessonData
-        );
-        message.success("Thêm bài học thành công!");
-      }
+    if (isEditMode) {
+      await axios.put(
+        `https://math-be.onrender.com/api/v1/course/${storedId}/lessons/${editingLesson._id}`,
+        lessonData
+      );
+      form.resetFields();
+      message.success("Bài học đã được cập nhật!");
+    } else {
+      await axios.post(
+        "https://math-be.onrender.com/api/v1/lesson/create/lesson",
+        lessonData
+      );
+      form.resetFields();
+      message.success("Thêm bài học thành công!");
+    }
 
-      fetchDocuments(); 
-      handleModalClose(); // Đóng modal sau khi thành công
+    fetchDocuments();
+    handleModalClose(); // Đóng modal sau khi thành công
   };
   const showDeleteModal = (lesson) => {
     setDeletingLesson(lesson);
@@ -227,6 +247,7 @@ function CourseDetail() {
         `https://math-be.onrender.com/api/v1/course/${storedId}/lessons/${deletingLesson._id}`
       );
       message.success("Bài học đã bị xóa!");
+      form.resetFields();
       fetchDocuments();
       setIsDeleteModalVisible(false); // Đóng modal sau khi xóa thành công
     } catch (error) {
@@ -235,10 +256,12 @@ function CourseDetail() {
   };
 
   const pageSizeOptions = [5, 10, 15, 20];
-  const currentData = documents.slice(
-    (pagination.current - 1) * pagination.pageSize,
-    pagination.current * pagination.pageSize
-  );
+  const currentData = React.useMemo(() => {
+    return documents.slice(
+      (pagination.current - 1) * pagination.pageSize,
+      pagination.current * pagination.pageSize
+    );
+  }, [documents, pagination.current, pagination.pageSize]);
 
   return (
     <div style={{ padding: "20px" }}>
@@ -279,15 +302,90 @@ function CourseDetail() {
           >
             <Input />
           </Form.Item>
-          <Form.Item
-            name="videoUrl"
-            label="Link bài học"
-            rules={[{ required: true, message: "Vui lòng nhập link bài học" }]}
+          <Form.List
+            name="videos"
+            initialValue={editingLesson?.videos || []}
+            rules={[
+              {
+                validator: async (_, videos) => {
+                  if (!videos || videos.length < 1) {
+                    return Promise.reject(
+                      new Error("Vui lòng thêm ít nhất một video!")
+                    );
+                  }
+                },
+              },
+            ]}
           >
-            <Input />
-          </Form.Item>
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, fieldKey, formItemField }) => (
+                  <Space
+                    key={key}
+                    style={{
+                      display: "flex",
+                      marginBottom: 8,
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                    align="baseline"
+                  >
+                    <Form.Item
+                      {...formItemField}
+                      name={[fieldKey, "title"]}
+                      label="Tiêu đề video"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Vui lòng nhập tiêu đề video!",
+                        },
+                      ]}
+                      style={{ marginRight: 8 }} // Giảm khoảng cách giữa các phần tử
+                    >
+                      <Input placeholder="Tiêu đề video" />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...formItemField}
+                      name={[fieldKey, "videoUrl"]}
+                      label="Link video"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập URL video!" },
+                      ]}
+                      style={{ marginRight: 8 }} // Giảm khoảng cách giữa các phần tử
+                    >
+                      <Input placeholder="Link video" />
+                    </Form.Item>
+
+                    <Button
+                      type="danger"
+                      icon={<DeleteOutlined />}
+                      onClick={() => remove(key)}
+                      style={{ marginLeft: 8 }} // Tạo khoảng cách giữa Button và Form.Item
+                    >
+                      Xóa
+                    </Button>
+                  </Space>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    icon={<PlusOutlined />}
+                    onClick={() => add()}
+                    block
+                  >
+                    Thêm video
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
           <Form.Item>
-            <Button type="primary" onClick={handleSubmit} style={{ width: "100%" }}>
+            <Button
+              type="primary"
+              onClick={handleSubmit}
+              style={{ width: "100%" }}
+            >
               {isEditMode ? "Cập nhật" : "Tải lên"}
             </Button>
           </Form.Item>
@@ -302,7 +400,10 @@ function CourseDetail() {
         okType="danger"
         cancelText="Hủy"
       >
-        <p>Bạn có chắc muốn xóa bài học "{deletingLesson?.title}"? Hành động này không thể hoàn tác.</p>
+        <p>
+          Bạn có chắc muốn xóa bài học "{deletingLesson?.title}"? Hành động này
+          không thể hoàn tác.
+        </p>
       </Modal>
 
       <div style={{ marginBottom: 16 }}>
